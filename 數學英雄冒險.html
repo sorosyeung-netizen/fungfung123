@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Hero Adventure - Kids Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            color: #FFD700;
+            font-size: 20px;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .title {
+            font-size: 48px;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .game-selection {
+            display: flex;
+            gap: 30px;
+            z-index: 10;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            width: 200px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .hero-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-description {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* 遊戲頁面樣式 */
+        .game-screen {
+            display: none;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .game-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .space-bg {
+            background-image: url('pictures/spibg.jpg?v=2025') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-color: transparent !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1 !important;
+        }
+
+        .space-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(0, 4, 40, 0.3) 0%, 
+                rgba(0, 78, 146, 0.2) 50%, 
+                rgba(243, 156, 18, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        /* 添加夢幻發光效果 */
+        .space-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 70%);
+            animation: dreamyGlow 6s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes dreamyGlow {
+            0% { 
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes spaceRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes sparkle {
+            0% { transform: translateY(0px) scale(1); opacity: 1; }
+            50% { transform: translateY(-50px) scale(1.2); opacity: 0.8; }
+            100% { transform: translateY(-100px) scale(1); opacity: 1; }
+        }
+
+        @keyframes sunGlow {
+            0% { 
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            100% { 
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+
+
+        .future-bg {
+            background-image: url('pictures/ironbg.jpg?v=2025') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-color: transparent !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1 !important;
+        }
+
+        .future-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(255, 0, 0, 0.4) 0%, 
+                rgba(255, 204, 0, 0.3) 50%, 
+                rgba(139, 0, 0, 0.5) 100%);
+            pointer-events: none;
+        }
+
+        .future-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 70%);
+            animation: ironGlow 4s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes ironGlow {
+            0% { 
+                opacity: 0.2;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        .ocean-bg {
+            background-image: url('pictures/blackbg.jpg?v=2025') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-color: transparent !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1 !important;
+        }
+
+        .ocean-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(75, 0, 130, 0.4) 0%, 
+                rgba(25, 25, 112, 0.3) 50%, 
+                rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+        }
+
+        .ocean-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(138, 43, 226, 0.1) 0%, 
+                transparent 70%);
+            animation: pantherGlow 4s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pantherGlow {
+            0% { 
+                opacity: 0.2;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        .spider-space-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spider-hero-display {
+            width: 90px;
+            height: 90px;
+            margin: 15px auto;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5), 0 0 30px rgba(255, 0, 0, 0.3);
+            animation: spiderGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes spiderGlow {
+            0% { 
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.5), 0 0 60px rgba(255, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 0 40px rgba(255, 0, 0, 0.8), 0 0 80px rgba(255, 0, 0, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        .spider-question {
+            font-size: 48px;
+            color: #fff;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            background: rgba(255, 0, 0, 0.2);
+            padding: 20px 40px;
+            border-radius: 50px;
+            border: 3px solid #ff0000;
+            backdrop-filter: blur(10px);
+        }
+
+        .spider-balloons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 26px 0;
+            padding: 0 13px;
+            max-width: 390px;
+        }
+
+        .spider-balloon {
+            position: relative;
+            width: 98px;
+            height: 107px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        .balloon {
+            width: 100%;
+            height: 87px;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 
+                inset -5px -5px 10px rgba(0,0,0,0.2),
+                0 5px 16px rgba(255, 0, 0, 0.4);
+            animation: floatBalloon 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .balloon::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 9px;
+            width: 14px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: rotate(-45deg);
+        }
+
+        .balloon-string {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, #666, transparent);
+            transform: translateX(-50%);
+        }
+
+        .spider-icon {
+            position: absolute;
+            top: -9px;
+            right: -9px;
+            width: 29px;
+            height: 29px;
+            background: url('pictures/spider man.jpg') center/cover;
+            border-radius: 50%;
+            border: 1.3px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        @keyframes floatBalloon {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        .spider-balloon:hover {
+            transform: scale(1.1);
+        }
+
+        .spider-balloon.correct {
+            animation: correctBalloon 1s ease;
+        }
+
+        .spider-balloon.wrong {
+            animation: spiderWebShoot 1.2s ease forwards;
+            position: relative;
+        }
+
+        @keyframes correctBalloon {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3) rotate(5deg); }
+            50% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(3deg); }
+            100% { transform: scale(1.1); }
+        }
+
+        @keyframes spiderWebShoot {
+            0% { 
+                transform: scale(1) rotate(0deg); 
+                filter: brightness(1);
+            }
+            20% { 
+                transform: scale(1.2) rotate(10deg); 
+                filter: brightness(1.4);
+            }
+            40% { 
+                transform: scale(0.8) rotate(-6deg); 
+                filter: brightness(0.6);
+            }
+            60% { 
+                transform: scale(1.1) rotate(4deg); 
+                filter: brightness(1.3);
+            }
+            80% { 
+                transform: scale(0.9) rotate(-2deg); 
+                filter: brightness(0.8);
+            }
+            100% { 
+                transform: scale(0.1) rotate(0deg); 
+                opacity: 0.05;
+                filter: brightness(0.2);
+            }
+        }
+
+
+
+        .spider-score {
+            font-size: 14px;
+            color: #FFD700;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 12px;
+            border: 1px solid #FFD700;
+        }
+
+        /* 大X標記樣式 */
+        .wrong-x-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #ff0000;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: xMarkPulse 1s ease-in-out infinite;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @keyframes xMarkPulse {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes heroFireworkExplode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 蜘蛛絲特效樣式 */
+        .spider-web-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .spider-hand {
+            position: absolute;
+            left: 20%;
+            top: 50%;
+            width: 60px;
+            height: 60px;
+            background: url('pictures/spider man.jpg') center/cover;
+            border-radius: 50%;
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            z-index: 1001;
+            animation: spiderHandShoot 0.5s ease-out;
+        }
+
+        .spider-web {
+            position: absolute;
+            left: 22%;
+            top: 52%;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 1px;
+            transform-origin: left center;
+            z-index: 1000;
+            animation: webShoot 1.2s ease-out forwards;
+            box-shadow: 
+                0 0 8px rgba(255, 255, 255, 1),
+                0 0 15px rgba(255, 255, 255, 0.8),
+                0 0 25px rgba(255, 255, 255, 0.6);
+            filter: brightness(1.2);
+        }
+
+        .spider-web::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(200, 230, 255, 0.7) 50%, 
+                rgba(255, 255, 255, 0.9) 100%);
+            animation: webShimmer 0.3s ease-in-out infinite alternate;
+            border-radius: 2px;
+            filter: blur(1px);
+        }
+
+        @keyframes spiderHandShoot {
+            0% { transform: scale(0.8) rotate(-10deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes webShoot {
+            0% {
+                width: 0;
+                opacity: 0;
+                transform: rotate(0deg) scaleY(0.3);
+            }
+            15% {
+                width: 50px;
+                opacity: 1;
+                transform: rotate(2deg) scaleY(0.8);
+            }
+            100% {
+                width: 450px;
+                opacity: 1;
+                transform: rotate(-3deg) scaleY(1);
+            }
+        }
+
+        @keyframes webShimmer {
+            0% { 
+                opacity: 0.8; 
+                box-shadow: 0 0 8px rgba(255, 255, 255, 1);
+            }
+            100% { 
+                opacity: 1; 
+                box-shadow: 0 0 12px rgba(255, 255, 255, 1), 0 0 20px rgba(200, 230, 255, 0.8);
+            }
+        }
+
+        /* 煙火特效樣式 */
+        .firework-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .firework {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: fireworkExplode 2.5s ease-out forwards;
+            box-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 0 80px currentColor;
+            filter: brightness(1.8) saturate(2);
+            z-index: 1002;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            15% {
+                transform: translate(0, -150px) scale(1.5);
+                opacity: 1;
+            }
+            20% {
+                transform: translate(0, -150px) scale(2);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .firework-trail {
+            position: absolute;
+            width: 6px;
+            height: 200px;
+            background: linear-gradient(to top, 
+                transparent 0%, 
+                var(--color) 20%, 
+                var(--color) 80%, 
+                white 100%);
+            animation: fireworkTrail 1.2s ease-out forwards;
+            transform-origin: bottom;
+            box-shadow: 0 0 15px var(--color), 0 0 30px var(--color);
+            filter: brightness(1.5) saturate(1.5);
+            z-index: 1001;
+        }
+
+        @keyframes fireworkTrail {
+            0% {
+                transform: scaleY(0);
+                opacity: 1;
+            }
+            80% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        /* 通用遊戲容器樣式 */
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hero-display {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            animation: heroGlow 2s ease-in-out infinite alternate;
+        }
+
+        .iron-hero-display {
+            width: 180px;
+            height: 180px;
+            margin: 20px auto;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ffcc00;
+            box-shadow: 
+                0 0 30px rgba(255, 204, 0, 0.6),
+                0 0 60px rgba(255, 0, 0, 0.4),
+                0 0 90px rgba(255, 204, 0, 0.2);
+            animation: ironArcReactor 2s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        .iron-hero-display::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #00ffff, #0080ff);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: arcReactorPulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px #00ffff, 0 0 40px #0080ff;
+        }
+
+        @keyframes ironArcReactor {
+            0% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 204, 0, 0.6),
+                    0 0 60px rgba(255, 0, 0, 0.4),
+                    0 0 90px rgba(255, 204, 0, 0.2);
+                transform: scale(1) rotate(0deg);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 40px rgba(255, 204, 0, 0.8),
+                    0 0 80px rgba(255, 0, 0, 0.6),
+                    0 0 120px rgba(255, 204, 0, 0.4);
+                transform: scale(1.05) rotate(5deg);
+            }
+        }
+
+        @keyframes arcReactorPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes heroGlow {
+            0% { 
+                box-shadow: 0 0 20px rgba(0,0,0,0.3);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 0 30px rgba(0,0,0,0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        .question {
+            font-size: 36px;
+            color: #333;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 40px;
+            border-radius: 50px;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .iron-question {
+            font-size: 42px;
+            color: #fff;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(255, 204, 0, 0.2));
+            padding: 20px 40px;
+            border-radius: 50px;
+            border: 3px solid #ffcc00;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 20px rgba(255, 204, 0, 0.5),
+                inset 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+            padding: 0 20px;
+            max-width: 400px;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .iron-answer-btn {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000);
+            color: white;
+            border: 2px solid #ffcc00;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(255, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Black Panther 雞蛋答案按鈕樣式 */
+        .panther-egg-btn {
+            background: linear-gradient(135deg, #FFFACD, #F5DEB3);
+            color: #333;
+            border: 2px solid #8B4513;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            padding: 25px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.3),
+                inset -2px -2px 8px rgba(0,0,0,0.1),
+                inset 2px 2px 8px rgba(255,255,255,0.5);
+            min-height: 80px;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panther-egg-btn::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            width: 30%;
+            height: 40%;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+        }
+
+        .panther-egg-btn::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: linear-gradient(135deg, transparent 40%, rgba(139, 69, 19, 0.1) 100%);
+        }
+
+        .panther-egg-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 8px 20px rgba(0,0,0,0.4),
+                0 0 20px rgba(138, 43, 226, 0.3);
+            background: linear-gradient(135deg, #FFFACD, #FFE4B5);
+        }
+
+        .panther-egg-btn.correct {
+            background: linear-gradient(135deg, #90EE90, #98FB98);
+            border-color: #228B22;
+            animation: eggCrack 0.8s ease;
+        }
+
+        .panther-egg-btn.wrong {
+            background: linear-gradient(135deg, #8B4513, #A0522D) !important;
+            border-color: #8B0000 !important;
+            animation: eggCrackBroken 1.2s ease forwards;
+            position: relative;
+            transform-origin: center;
+        }
+
+        .panther-egg-btn.wrong::before {
+            content: '';
+            position: absolute;
+            top: 25%;
+            left: 35%;
+            width: 30%;
+            height: 2px;
+            background: #654321;
+            transform: rotate(-30deg);
+            opacity: 0;
+            animation: crackAppear 0.3s ease 0.4s forwards;
+            z-index: 2;
+        }
+
+        .panther-egg-btn.wrong::after {
+            content: '';
+            position: absolute;
+            top: 55%;
+            right: 30%;
+            width: 25%;
+            height: 2px;
+            background: #654321;
+            transform: rotate(45deg);
+            opacity: 0;
+            animation: crackAppear 0.3s ease 0.6s forwards;
+            z-index: 2;
+        }
+
+        @keyframes eggCrack {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            50% { transform: scale(1.15) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(3deg); }
+            100% { transform: scale(1.05) rotate(0deg); }
+        }
+
+        @keyframes eggShake {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            50% { transform: translateX(5px) rotate(5deg); }
+            75% { transform: translateX(-5px) rotate(-5deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+
+        @keyframes eggCrackBroken {
+            0% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+            }
+            15% { 
+                transform: scale(1.1) rotate(-8deg); 
+            }
+            30% { 
+                transform: scale(1.15) rotate(8deg); 
+            }
+            45% { 
+                transform: scale(1.2) rotate(-5deg); 
+            }
+            60% { 
+                transform: scale(1.1) rotate(5deg); 
+                opacity: 0.8;
+            }
+            75% { 
+                transform: scale(0.9) rotate(-3deg); 
+                opacity: 0.6;
+            }
+            90% { 
+                transform: scale(0.7) rotate(2deg); 
+                opacity: 0.4;
+            }
+            100% { 
+                transform: scale(0.5) rotate(0deg); 
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes crackAppear {
+            0% { opacity: 0; transform: scale(0); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .iron-answer-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 6px 20px rgba(255, 0, 0, 0.6),
+                0 0 30px rgba(255, 204, 0, 0.4);
+            background: linear-gradient(135deg, #ff3333, #ff0000);
+        }
+
+        .iron-answer-btn.correct {
+            background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+            border-color: #00ff00 !important;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.6),
+                0 0 40px rgba(0, 255, 0, 0.4) !important;
+            animation: ironCorrect 0.6s ease;
+        }
+
+        .iron-answer-btn.wrong {
+            background: linear-gradient(135deg, #8B0000, #FF0000) !important;
+            border-color: #ff0000 !important;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 0, 0.8),
+                0 0 40px rgba(255, 0, 0, 0.6) !important;
+            animation: ironWrong 0.6s ease;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            animation: correctAnswer 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, #f44336, #da190b);
+            animation: wrongAnswer 0.5s ease;
+        }
+
+        @keyframes ironCorrect {
+            0% { 
+                transform: scale(1) rotate(0deg); 
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            }
+            25% { 
+                transform: scale(1.15) rotate(5deg); 
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+            }
+            50% { 
+                transform: scale(1.1) rotate(-5deg); 
+                box-shadow: 0 0 25px rgba(0, 255, 0, 0.7);
+            }
+            75% { 
+                transform: scale(1.2) rotate(3deg); 
+                box-shadow: 0 0 35px rgba(0, 255, 0, 0.9);
+            }
+            100% { 
+                transform: scale(1.05) rotate(0deg); 
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            }
+        }
+
+        @keyframes ironWrong {
+            0% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+            }
+            15% { 
+                transform: scale(1.1) rotate(-8deg); 
+                opacity: 0.9;
+            }
+            30% { 
+                transform: scale(1.1) rotate(8deg); 
+                opacity: 0.8;
+            }
+            45% { 
+                transform: scale(1.1) rotate(-8deg); 
+                opacity: 0.7;
+            }
+            60% { 
+                transform: scale(1.1) rotate(8deg); 
+                opacity: 0.6;
+            }
+            75% { 
+                transform: scale(0.9) rotate(-5deg); 
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+            }
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wrongAnswer {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+            100% { transform: scale(1); }
+        }
+
+        .spider-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .spider-confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ff0000;
+            animation: spiderConfettiFall 3s linear infinite;
+        }
+
+        @keyframes spiderConfettiFall {
+            0% { 
+                transform: translateY(-100vh) rotate(0deg); 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100vh) rotate(720deg); 
+                opacity: 0;
+            }
+        }
+
+        .congrats-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            z-index: 1001;
+            animation: congratsPop 2s ease;
+        }
+
+        @keyframes congratsPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .score {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.1) 100%);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: fireworkExplode 2s ease-out forwards;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .firework-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            animation: particleExplode 1.5s ease-out forwards;
+        }
+
+        @keyframes particleExplode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #fff, transparent);
+            border-radius: 50%;
+            animation: sparkleTwinkle 1s ease-in-out infinite;
+        }
+
+        @keyframes sparkleTwinkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 移動端響應式設計 */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+            
+            .game-selection {
+                flex-direction: column;
+                gap: 20px;
+                padding: 0 20px;
+            }
+            
+            .game-card {
+                width: 100%;
+                max-width: 300px;
+                padding: 20px;
+            }
+            
+            .hero-icon {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .game-title {
+                font-size: 20px;
+            }
+            
+            .game-description {
+                font-size: 14px;
+            }
+            
+            .spider-question {
+                font-size: 32px;
+                padding: 15px 25px;
+                margin: 15px 10px;
+            }
+            
+            .spider-balloons {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                padding: 0 15px;
+                max-width: 320px;
+            }
+            
+            .spider-balloon {
+                width: 120px;
+                height: 130px;
+            }
+            
+            .balloon {
+                width: 100%;
+                height: 100px;
+                font-size: 20px;
+            }
+            
+            .spider-icon {
+                width: 35px;
+                height: 35px;
+                top: -12px;
+                right: -12px;
+            }
+            
+            .spider-hero-display {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .score {
+                font-size: 20px;
+            }
+            
+            .back-btn {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+            
+            .congrats-message {
+                font-size: 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 28px;
+            }
+            
+            .spider-question {
+                font-size: 28px;
+                padding: 12px 20px;
+            }
+            
+            .spider-balloon {
+                width: 100px;
+                height: 110px;
+            }
+            
+            .balloon {
+                height: 85px;
+                font-size: 18px;
+            }
+            
+            .congrats-message {
+                font-size: 32px;
+            }
+        }
+
+        /* 防止手機橫向滾動 */
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        /* 優化觸控體驗 */
+        .game-card, .spider-balloon, .back-btn {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* 改善觸控目標大小 */
+        @media (hover: none) and (pointer: coarse) {
+            .game-card:hover,
+            .spider-balloon:hover {
+                transform: none;
+            }
+            
+            .game-card:active,
+            .spider-balloon:active {
+                transform: scale(0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景星星 -->
+    <div class="stars" id="stars"></div>
+
+    <!-- 主選單 -->
+    <div id="mainMenu">
+        <h1 class="title">🦸‍♂️ Math Hero Adventure 🦸‍♀️</h1>
+        <div class="game-selection">
+            <div class="game-card" onclick="startGame('addition')">
+                <img src="pictures/spider man.jpg" alt="Spider-Man" class="hero-icon">
+                <div class="game-title">Spider-Man Addition</div>
+                <div class="game-description">Addition adventure with answers up to 10</div>
+            </div>
+            <div class="game-card" onclick="startGame('subtraction')">
+                <img src="pictures/iron.jpg" alt="Iron-Man" class="hero-icon">
+                <div class="game-title">Iron-Man Subtraction</div>
+                <div class="game-description">Subtraction challenge with answers up to 10</div>
+            </div>
+            <div class="game-card" onclick="startGame('mixed')">
+                <img src="pictures/黑豹.jpg" alt="Black Panther" class="hero-icon">
+                <div class="game-title">Black Panther Mixed</div>
+                <div class="game-description">Comprehensive math adventure</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遊戲屏幕 -->
+    <div class="game-screen" id="gameScreen">
+        <div class="game-background" id="gameBackground"></div>
+        <div class="game-container" id="gameContainer">
+            <img class="hero-display" id="heroDisplay" src="pictures/spider man.jpg" alt="Hero">
+            <div class="question" id="question">🎮 Ready to start the adventure!</div>
+            <div class="score">
+                Score: <span id="currentScore">0</span>
+            </div>
+            <div class="answers" id="answers">
+                <div class="loading-text" style="color: #667eea; font-size: 24px;">🦸‍♂️ Hero arriving...</div>
+            </div>
+            <button onclick="backToMenu()" class="back-btn">🏠 Back to Home</button>
+        </div>
+    </div>
+
+    <!-- 慶祝動畫 -->
+    <div class="celebration" id="celebration"></div>
+
+    <!-- 音效控制按鈕 -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <button onclick="toggleMute()" id="muteBtn" style="background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">🔊</button>
+    </div>
+
+    <script>
+        let currentGame = null;
+        let score = 0;
+        let currentQuestion = null;
+        let totalQuestions = 20;
+        let currentQuestionNumber = 0;
+
+        // 音效控制
+        let isMuted = false;
+        let audioContext = null;
+
+        // 創建Marvel風格的音效
+        function createMarvelSounds() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            } catch (e) {
+                console.warn('Web Audio API not supported, sounds will be disabled');
+                isMuted = true;
+                return;
+            }
+            
+            // 播放正確音效 - 包含黑豹關卡的excellent女聲
+            window.playCorrectSound = function() {
+                if (isMuted || !audioContext) return;
+                
+                try {
+                    // 蜘蛛俠關卡使用特別的歡呼聲
+                    if (currentGame === 'addition') {
+                        // 歡呼聲 - 高頻和聲，增強版
+                        const frequencies = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98];
+                        frequencies.forEach((freq, index) => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            
+                            osc.connect(gain);
+                            gain.connect(audioContext.destination);
+                            
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                            
+                            // 增強音量效果
+                            gain.gain.setValueAtTime(0.7, audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                            
+                            osc.start(audioContext.currentTime + index * 0.08);
+                            osc.stop(audioContext.currentTime + 1.5);
+                        });
+                        
+                        // 添加低音效果增強震撼感
+                        const bassOsc = audioContext.createOscillator();
+                        const bassGain = audioContext.createGain();
+                        
+                        bassOsc.connect(bassGain);
+                        bassGain.connect(audioContext.destination);
+                        
+                        bassOsc.type = 'sine';
+                        bassOsc.frequency.setValueAtTime(261.63, audioContext.currentTime);
+                        
+                        bassGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+                        bassGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                        
+                        bassOsc.start(audioContext.currentTime);
+                        bassOsc.stop(audioContext.currentTime + 0.8);
+                        
+                    } else if (currentGame === 'mixed') {
+                        // 黑豹關卡只播放"excellent"女聲音效
+                        const utterance = new SpeechSynthesisUtterance('excellent');
+                        utterance.lang = 'en-US';
+                        utterance.rate = 0.9;
+                        utterance.pitch = 1.3; // 提高音調模擬女聲
+                        utterance.volume = 0.9; // 提高音量
+                        speechSynthesis.speak(utterance);
+                        
+                    } else {
+                        // 其他關卡保持原有音效
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                        
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.3);
+                    }
+                } catch (e) {
+                    console.warn('Failed to play correct sound:', e);
+                }
+            };
+
+            // 播放錯誤音效
+            window.playWrongSound = function() {
+                if (isMuted || !audioContext) return;
+                
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                } catch (e) {
+                    console.warn('Failed to play wrong sound:', e);
+                }
+            };
+
+            // 播放慶祝音效
+            window.playCelebrationSound = function() {
+                if (isMuted || !audioContext) return;
+                
+                try {
+                    const notes = [523.25, 659.25, 783.99, 1046.5];
+                    notes.forEach((freq, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.1);
+                        
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime + index * 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.1 + 0.3);
+                        
+                        oscillator.start(audioContext.currentTime + index * 0.1);
+                        oscillator.stop(audioContext.currentTime + index * 0.1 + 0.3);
+                    });
+                } catch (e) {
+                    console.warn('Failed to play celebration sound:', e);
+                }
+            };
+        }
+
+        // 創建背景星星
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = '★';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 靜音切換
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteBtn = document.getElementById('muteBtn');
+            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            muteBtn.title = isMuted ? 'Enable sound' : 'Disable sound';
+        }
+
+        // 開始遊戲
+        function startGame(gameType) {
+            currentGame = gameType;
+            score = 0;
+            currentQuestionNumber = 0;
+            consecutiveWrong = 0; // 重置連續答錯計數
+            
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            const gameBackground = document.getElementById('gameBackground');
+            const heroDisplay = document.getElementById('heroDisplay');
+            
+            // 設置背景與英雄圖片
+            if (gameType === 'addition') {
+                gameBackground.className = 'game-background space-bg';
+                heroDisplay.src = 'pictures/spider man.jpg';
+                heroDisplay.className = 'spider-hero-display';
+            } else if (gameType === 'subtraction') {
+                gameBackground.className = 'game-background future-bg';
+                heroDisplay.src = 'pictures/iron.jpg';
+                heroDisplay.className = 'iron-hero-display';
+            } else {
+                gameBackground.className = 'game-background ocean-bg';
+                heroDisplay.src = 'pictures/黑豹.jpg';
+                heroDisplay.className = 'hero-display';
+            }
+            
+            createMarvelSounds();
+            generateQuestion();
+        }
+
+        // 返回主選單
+        function backToMenu() {
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('celebration').style.display = 'none';
+        }
+
+        // 追蹤已使用的答案
+        let usedAnswers = [];
+        let consecutiveWrong = 0; // 連續答錯計數
+        
+        // 生成問題
+        function generateQuestion() {
+            // 答對10題就通關
+            if (score >= 100) {
+                showLevelComplete();
+                return;
+            }
+            
+            if (currentQuestionNumber >= totalQuestions) {
+                showLevelComplete();
+                return;
+            }
+            
+            currentQuestionNumber++;
+            
+            let num1, num2, answer, question;
+            
+            // 根據題目數重置已使用的答案（分成4組，每組5題）
+            if (currentQuestionNumber === 1 || currentQuestionNumber === 6 || currentQuestionNumber === 11 || currentQuestionNumber === 16) {
+                usedAnswers = [];
+            }
+            
+            // 生成不重複的答案
+            let maxAttempts = 100;
+            let attempts = 0;
+            
+            // 根據組別設定不同難度
+            let group = Math.ceil(currentQuestionNumber / 5);
+            let maxNum, minNum;
+            
+            // 設定每組的數字範圍
+            switch(group) {
+                case 1: // 第1-5題
+                    maxNum = 5;
+                    minNum = 1;
+                    break;
+                case 2: // 第6-10題
+                    maxNum = 8;
+                    minNum = 3;
+                    break;
+                case 3: // 第11-15題
+                    maxNum = 12;
+                    minNum = 5;
+                    break;
+                case 4: // 第16-20題
+                    maxNum = 15;
+                    minNum = 8;
+                    break;
+            }
+            
+            do {
+                if (currentGame === 'addition') {
+                    num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                    num2 = Math.floor(Math.random() * (maxNum - num1 + 1)) + 1;
+                    answer = num1 + num2;
+                    question = `${num1} + ${num2} = ?`;
+                } else if (currentGame === 'subtraction') {
+                    num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                    num2 = Math.floor(Math.random() * (num1)) + 1;
+                    answer = num1 - num2;
+                    question = `${num1} - ${num2} = ?`;
+                } else {
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                        num2 = Math.floor(Math.random() * (maxNum - num1 + 1)) + 1;
+                        answer = num1 + num2;
+                        question = `${num1} + ${num2} = ?`;
+                    } else {
+                        num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                        num2 = Math.floor(Math.random() * (num1)) + 1;
+                        answer = num1 - num2;
+                        question = `${num1} - ${num2} = ?`;
+                    }
+                }
+                
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    // 如果無法找到新的答案，允許重複
+                    break;
+                }
+            } while (usedAnswers.includes(answer));
+            
+            usedAnswers.push(answer);
+            currentQuestion = { question, answer };
+            
+            // 顯示問題
+            const questionElement = document.getElementById('question');
+            questionElement.textContent = question;
+            if (currentGame === 'addition') {
+                questionElement.className = 'spider-question';
+            } else if (currentGame === 'subtraction') {
+                questionElement.className = 'iron-question';
+            } else {
+                questionElement.className = 'question';
+            }
+            document.getElementById('currentScore').textContent = score;
+            
+            // 生成答案選項
+            generateAnswers(answer);
+        }
+
+        // 生成答案選項
+        function generateAnswers(correctAnswer) {
+            const answersContainer = document.getElementById('answers');
+            answersContainer.innerHTML = '';
+            
+            const answers = [correctAnswer];
+            
+            // 生成其他選項
+            while (answers.length < 4) {
+                const wrongAnswer = Math.max(0, correctAnswer + Math.floor(Math.random() * 7) - 3);
+                if (!answers.includes(wrongAnswer)) {
+                    answers.push(wrongAnswer);
+                }
+            }
+            
+            // 打亂答案順序
+            answers.sort(() => Math.random() - 0.5);
+            
+            if (currentGame === 'addition') {
+                // Spider-Man Addition使用氣球答案
+                answersContainer.className = 'spider-balloons';
+                answers.forEach(answer => {
+                    const balloonDiv = document.createElement('div');
+                    balloonDiv.className = 'spider-balloon';
+                    
+                    const balloon = document.createElement('div');
+                    balloon.className = 'balloon';
+                    balloon.textContent = answer;
+                    
+                    const string = document.createElement('div');
+                    string.className = 'balloon-string';
+                    
+                    const spiderIcon = document.createElement('div');
+                    spiderIcon.className = 'spider-icon';
+                    
+                    balloonDiv.appendChild(balloon);
+                    balloonDiv.appendChild(string);
+                    balloonDiv.appendChild(spiderIcon);
+                    
+                    balloonDiv.onclick = () => checkAnswer(answer, correctAnswer, balloonDiv);
+                    answersContainer.appendChild(balloonDiv);
+                });
+            } else if (currentGame === 'subtraction') {
+                // Iron-Man Subtraction使用紅色按鈕
+                answersContainer.className = 'answers';
+                answers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.className = 'iron-answer-btn';
+                    button.textContent = answer;
+                    button.onclick = () => checkAnswer(answer, correctAnswer, button);
+                    answersContainer.appendChild(button);
+                });
+            } else {
+                // Black Panther Mixed使用雞蛋答案按鈕
+                answersContainer.className = 'answers';
+                answers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.className = 'panther-egg-btn';
+                    button.textContent = answer;
+                    button.onclick = () => checkAnswer(answer, correctAnswer, button);
+                    answersContainer.appendChild(button);
+                });
+            }
+        }
+
+        // 檢查答案
+        function checkAnswer(selected, correct, element) {
+            let elements;
+            if (currentGame === 'addition') {
+                elements = document.querySelectorAll('.spider-balloon');
+            } else if (currentGame === 'subtraction') {
+                elements = document.querySelectorAll('.iron-answer-btn');
+            } else {
+                elements = document.querySelectorAll('.panther-egg-btn');
+            }
+            
+            elements.forEach(el => el.style.pointerEvents = 'none');
+            
+            if (selected === correct) {
+                element.classList.add('correct');
+                score += 10;
+                consecutiveWrong = 0; // 重置連續答錯計數
+                playCorrectSound();
+                
+                // 鋼鐵人關卡答對時觸發煙火特效
+                if (currentGame === 'subtraction') {
+                    triggerCorrectAnswerFireworks();
+                }
+                
+                // 蜘蛛俠關卡答對時觸發蜘蛛絲特效
+                if (currentGame === 'addition') {
+                    triggerSpiderWebEffect();
+                }
+                
+                setTimeout(() => {
+                    generateQuestion();
+                }, 1000);
+            } else {
+                element.classList.add('wrong');
+                consecutiveWrong++;
+                playWrongSound();
+                
+                // Spider-Man Addition關卡添加大X標記和"bad"音效
+                if (currentGame === 'addition') {
+                    const xMark = document.createElement('div');
+                    xMark.className = 'wrong-x-mark';
+                    xMark.innerHTML = '❌';
+                    element.appendChild(xMark);
+                    
+                    // 播放"bad"音效
+                    const utterance = new SpeechSynthesisUtterance('bad');
+                    utterance.lang = 'en-US';
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    speechSynthesis.speak(utterance);
+                }
+                
+                // 顯示正確答案
+                elements.forEach(el => {
+                    const content = currentGame === 'addition' ? 
+                        el.querySelector('.balloon').textContent : 
+                        el.textContent;
+                    
+                    if (parseInt(content) === correct) {
+                        el.classList.add('correct');
+                    }
+                });
+                
+                // 檢查是否連續答錯4題
+                if (consecutiveWrong >= 4) {
+                    setTimeout(() => {
+                        showGameOver();
+                    }, 2000);
+                } else {
+                    setTimeout(() => {
+                        generateQuestion();
+                    }, 2000);
+                }
+            }
+        }
+
+        // 顯示Game Over畫面
+        function showGameOver() {
+            const celebration = document.getElementById('celebration');
+            celebration.style.display = 'block';
+            celebration.innerHTML = '';
+            
+            // 創建Game Over訊息
+            const message = document.createElement('div');
+            message.className = 'game-over-message';
+            message.innerHTML = `
+                <div style="font-size: 48px; color: #ff4444; margin-bottom: 20px; animation: pulse 1.5s ease-in-out infinite;">💀 GAME OVER 💀</div>
+                <div style="font-size: 24px; color: #fff; margin-bottom: 15px;">
+                    連續答錯 ${consecutiveWrong} 題！
+                </div>
+                <div style="font-size: 20px; color: #ccc; margin-bottom: 30px;">
+                    最終分數: ${score} 分
+                </div>
+                <div style="font-size: 16px; color: #888;">
+                    3秒後自動返回主選單...
+                </div>
+            `;
+            celebration.appendChild(message);
+            
+            // 添加失敗特效
+            celebration.style.background = 'linear-gradient(135deg, rgba(0,0,0,0.9), rgba(68,68,68,0.9))';
+            
+            // 添加脈衝動畫
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.1); opacity: 0.8; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            playWrongSound();
+            
+            // 3秒後自動返回主選單
+            setTimeout(() => {
+                backToMenu();
+            }, 3000);
+        }
+
+        // 蜘蛛俠蜘蛛絲特效（簡化版 - 只有白色實心線條）
+        function triggerSpiderWebEffect() {
+            const webContainer = document.createElement('div');
+            webContainer.className = 'spider-web-container';
+            document.body.appendChild(webContainer);
+
+            // 創建蜘蛛俠的手
+            const spiderHand = document.createElement('div');
+            spiderHand.className = 'spider-hand';
+            webContainer.appendChild(spiderHand);
+
+            // 創建蜘蛛絲主線（白色實心線條）
+            const spiderWeb = document.createElement('div');
+            spiderWeb.className = 'spider-web';
+            webContainer.appendChild(spiderWeb);
+
+            // 2.5秒後移除特效
+            setTimeout(() => {
+                if (webContainer.parentNode) {
+                    webContainer.parentNode.removeChild(webContainer);
+                }
+            }, 2500);
+        }
+
+        // 顯示關卡通關特效
+        function showLevelComplete() {
+            const celebration = document.getElementById('celebration');
+            celebration.style.display = 'block';
+            celebration.innerHTML = '';
+            
+            // 根據關卡類型顯示不同的通關訊息和背景
+            let heroName, message, bgColor, heroEmoji;
+            if (currentGame === 'addition') {
+                heroName = 'Spider-Man';
+                message = 'You successfully helped Spider-Man complete his math mission!';
+                bgColor = 'linear-gradient(135deg, rgba(255, 0, 0, 0.9), rgba(0, 0, 255, 0.8))';
+                heroEmoji = '🕷️';
+            } else if (currentGame === 'subtraction') {
+                heroName = 'Iron Man';
+                message = 'Iron Man\'s armor has been fully charged!';
+                bgColor = 'linear-gradient(135deg, rgba(255, 69, 0, 0.9), rgba(255, 215, 0, 0.8))';
+                heroEmoji = '⚙️';
+            } else {
+                heroName = 'Black Panther';
+                message = 'The mathematical mystery of Wakanda has been solved!';
+                bgColor = 'linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(0, 0, 0, 0.8))';
+                heroEmoji = '🐾';
+            }
+            
+            celebration.style.background = bgColor;
+            
+            // 創建英雄專屬通關訊息
+            const congratsMessage = document.createElement('div');
+            congratsMessage.className = 'level-complete-message';
+            congratsMessage.innerHTML = `
+                <div style="font-size: 60px; margin: 20px 0; animation: bounceIn 1s ease-out;">
+                    ${heroEmoji} Level Complete! ${heroEmoji}
+                </div>
+                <div style="font-size: 28px; color: #FFD700; margin: 15px 0; animation: fadeIn 1.5s ease-out;">
+                    🎉 ${message} 🎉
+                </div>
+                <div style="font-size: 36px; color: #fff; margin: 20px 0; animation: pulse 2s ease-in-out infinite;">
+                    ${score/10} questions correct, mission accomplished!
+                </div>
+                <div style="font-size: 20px; color: #ccc; margin: 15px 0;">
+                    Hero ${heroName} thanks for your help!
+                </div>
+            `;
+            celebration.appendChild(congratsMessage);
+            
+            // 添加英雄專屬動畫效果
+            const heroStyles = document.createElement('style');
+            heroStyles.textContent = `
+                @keyframes bounceIn {
+                    0% { transform: scale(0.3); opacity: 0; }
+                    50% { transform: scale(1.05); }
+                    70% { transform: scale(0.9); }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                    100% { transform: scale(1); }
+                }
+                .hero-confetti {
+                    position: absolute;
+                    width: 10px;
+                    height: 10px;
+                    animation: confettiFall 3s linear infinite;
+                }
+                @keyframes confettiFall {
+                    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(heroStyles);
+            
+            // 創建英雄專屬彩色紙屑
+            const colors = ['#FFD700', '#FF69B4', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'];
+            for (let i = 0; i < 200; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'hero-confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 20 + 8) + 'px';
+                confetti.style.height = (Math.random() * 20 + 8) + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                celebration.appendChild(confetti);
+            }
+            
+            // 英雄專屬煙火秀
+            setTimeout(() => {
+                congratsMessage.querySelector('div:nth-child(1)').innerHTML = `${heroEmoji} Hero Celebration Begins! ${heroEmoji}`;
+            }, 1000);
+            
+            // 發射英雄專屬煙火
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    createHeroFirework(colors[Math.floor(Math.random() * colors.length)], heroEmoji);
+                }, i * 300 + 1500);
+            }
+            
+            // 添加英雄標誌星星效果
+            for (let i = 0; i < 80; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'hero-sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 3 + 's';
+                sparkle.style.animationDuration = '2s';
+                sparkle.innerHTML = heroEmoji;
+                sparkle.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                celebration.appendChild(sparkle);
+            }
+            
+            playCelebrationSound();
+            
+            // 5秒後返回主選單
+            setTimeout(() => {
+                backToMenu();
+            }, 5000);
+        }
+        
+        // 創建英雄專屬煙火效果
+        function createHeroFirework(color, heroEmoji) {
+            const celebration = document.getElementById('celebration');
+            
+            // 煙花發射點
+            const startX = Math.random() * 80 + 10;
+            const startY = Math.random() * 40 + 20;
+            
+            // 創建英雄專屬爆炸粒子
+            for (let i = 0; i < 35; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'hero-firework-particle';
+                particle.style.backgroundColor = color;
+                
+                const angle = (i / 35) * Math.PI * 2;
+                const distance = Math.random() * 150 + 80;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.left = startX + '%';
+                particle.style.top = startY + '%';
+                
+                particle.style.animation = `heroFireworkExplode 1.5s ease-out forwards`;
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                
+                celebration.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 1500);
+            }
+        }
+
+        // 創建全屏煙火秀
+        function createFireworksShow() {
+            const celebration = document.getElementById('celebration');
+            
+            // 創建煙火容器
+            const fireworkContainer = document.createElement('div');
+            fireworkContainer.className = 'firework-container';
+            celebration.appendChild(fireworkContainer);
+            
+            // 發射多個煙火
+            const fireworkColors = ['#FFD700', '#FF69B4', '#00FFFF', '#00FF00', '#FF4500', '#9400D3', '#FF1493'];
+            
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const color = fireworkColors[Math.floor(Math.random() * fireworkColors.length)];
+                    const x = Math.random() * 80 + 10;
+                    const y = Math.random() * 50 + 10;
+                    
+                    createSingleFirework(x, y, color, fireworkContainer);
+                }, i * 300);
+            }
+            
+            // 3秒後移除容器
+            setTimeout(() => {
+                fireworkContainer.remove();
+            }, 6000);
+        }
+
+        // 創建單個煙火
+        function createSingleFirework(x, y, color, container) {
+            // 創建發射軌跡
+            const trail = document.createElement('div');
+            trail.className = 'firework-trail';
+            trail.style.left = x + '%';
+            trail.style.bottom = '0%';
+            trail.style.setProperty('--color', color);
+            container.appendChild(trail);
+            
+            setTimeout(() => {
+                trail.remove();
+                
+                // 創建爆炸效果
+                createFireworkExplosion(x, y, color, container);
+            }, 500);
+        }
+
+        // 創建煙火爆炸效果
+        function createFireworkExplosion(x, y, color, container) {
+            const particleCount = 80;
+            
+            // 第一波：主要爆炸
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                particle.style.left = x + '%';
+                particle.style.top = y + '%';
+                particle.style.backgroundColor = color;
+                particle.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
+                particle.style.filter = 'brightness(2) saturate(1.5)';
+                
+                const angle = (i / particleCount) * Math.PI * 2;
+                const distance = Math.random() * 200 + 100;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--dx', dx + 'px');
+                particle.style.setProperty('--dy', dy + 'px');
+                
+                container.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 2500);
+            }
+            
+            // 第二波：二次爆炸（更小更亮的粒子）
+            setTimeout(() => {
+                const secondCount = 40;
+                for (let i = 0; i < secondCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'firework';
+                    particle.style.left = x + '%';
+                    particle.style.top = y + '%';
+                    particle.style.backgroundColor = 'white';
+                    particle.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
+                    particle.style.filter = 'brightness(2.5) saturate(2)';
+                    particle.style.width = '8px';
+                    particle.style.height = '8px';
+                    
+                    const angle = (i / secondCount) * Math.PI * 2;
+                    const distance = Math.random() * 120 + 60;
+                    const dx = Math.cos(angle) * distance;
+                    const dy = Math.sin(angle) * distance;
+                    
+                    particle.style.setProperty('--dx', dx + 'px');
+                    particle.style.setProperty('--dy', dy + 'px');
+                    
+                    container.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }
+            }, 300);
+            
+            // 第三波：金色閃光效果
+            setTimeout(() => {
+                const sparkleCount = 25;
+                for (let i = 0; i < sparkleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'firework';
+                    particle.style.left = x + '%';
+                    particle.style.top = y + '%';
+                    particle.style.backgroundColor = '#FFD700';
+                    particle.style.boxShadow = '0 0 25px #FFD700, 0 0 50px #FFD700';
+                    particle.style.filter = 'brightness(3) saturate(1)';
+                    particle.style.width = '6px';
+                    particle.style.height = '6px';
+                    
+                    const angle = (i / sparkleCount) * Math.PI * 2;
+                    const distance = Math.random() * 80 + 40;
+                    const dx = Math.cos(angle) * distance;
+                    const dy = Math.sin(angle) * distance;
+                    
+                    particle.style.setProperty('--dx', dx + 'px');
+                    particle.style.setProperty('--dy', dy + 'px');
+                    
+                    container.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 1800);
+                }
+            }, 600);
+        }
+
+        // 初始化AudioContext（解決瀏覽器限制）
+        let globalAudioContext = null;
+        function initAudioContext() {
+            if (!globalAudioContext) {
+                globalAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return globalAudioContext;
+        }
+
+        // 播放煙火音效
+        function playFireworkSound() {
+            try {
+                const ctx = initAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                // 創建多個音效來模擬煙火爆炸
+                const sounds = [
+                    { freq: 800, duration: 0.4, type: 'sine', volume: 0.15 },
+                    { freq: 600, duration: 0.5, type: 'square', volume: 0.1 },
+                    { freq: 1000, duration: 0.3, type: 'sawtooth', volume: 0.12 },
+                    { freq: 1200, duration: 0.45, type: 'sine', volume: 0.08 }
+                ];
+                
+                sounds.forEach((sound, index) => {
+                    setTimeout(() => {
+                        try {
+                            const oscillator = ctx.createOscillator();
+                            const gainNode = ctx.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(ctx.destination);
+                            
+                            oscillator.type = sound.type;
+                            oscillator.frequency.setValueAtTime(sound.freq, ctx.currentTime);
+                            oscillator.frequency.exponentialRampToValueAtTime(sound.freq * 0.1, ctx.currentTime + sound.duration);
+                            
+                            gainNode.gain.setValueAtTime(sound.volume, ctx.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + sound.duration);
+                            
+                            oscillator.start(ctx.currentTime);
+                            oscillator.stop(ctx.currentTime + sound.duration);
+                        } catch (e) {
+                            console.log('音效播放錯誤:', e);
+                        }
+                    }, index * 60);
+                });
+            } catch (e) {
+                console.log('煙火音效錯誤:', e);
+            }
+        }
+
+        // 播放煙火發射音效
+        function playFireworkLaunchSound() {
+            try {
+                const ctx = initAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.3);
+            } catch (e) {
+                console.log('發射音效錯誤:', e);
+            }
+        }
+
+        // 在答對時觸發煙火特效
+        function triggerCorrectAnswerFireworks() {
+            // 創建煙火容器
+            const container = document.createElement('div');
+            container.className = 'firework-container';
+            document.body.appendChild(container);
+            
+            // 超級絢麗的煙火顏色組合
+            const colors = [
+                '#FFD700', '#FF69B4', '#00FFFF', '#00FF00', '#FF4500', '#9400D3', '#FF1493',
+                '#FF6347', '#00CED1', '#32CD32', '#FF8C00', '#DA70D6', '#20B2AA', '#FF00FF',
+                '#1E90FF', '#ADFF2F', '#FF7F50', '#6A5ACD', '#00FA9A', '#FFB6C1', '#87CEEB'
+            ];
+            
+            // 初始化AudioContext（確保音效可以播放）
+            initAudioContext();
+            
+            // 第一波：大規模煙火秀（15個）
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const x = Math.random() * 80 + 10;
+                    const y = Math.random() * 30 + 15;
+                    
+                    // 發射音效
+                    playFireworkLaunchSound();
+                    
+                    // 爆炸音效（根據煙火上升時間調整）
+                    setTimeout(() => {
+                        playFireworkSound();
+                    }, 1200); // 配合動畫時間1.2秒
+                    
+                    createSingleFirework(x, y, color, container);
+                }, i * 200); // 稍微增加間隔避免音效重疊
+            }
+            
+            // 第二波：中心大煙火（5個）
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        const x = 50 + (Math.random() - 0.5) * 20;
+                        const y = 30 + (Math.random() - 0.5) * 10;
+                        
+                        playFireworkLaunchSound();
+                        setTimeout(() => playFireworkSound(), 1200);
+                        
+                        createSingleFirework(x, y, color, container);
+                    }, i * 150);
+                }
+            }, 3500); // 延遲第二波開始時間
+            
+            // 6秒後移除容器
+            setTimeout(() => {
+                container.remove();
+            }, 7000);
+        }
+
+        // 初始化
+        createStars();
+    </script>
+</body>
+</html>
